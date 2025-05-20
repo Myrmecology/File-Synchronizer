@@ -1,6 +1,20 @@
 [package]
 name = "file_sync"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "A file synchronization tool written in Rust"
 
 [dependencies]
+walkdir = "2.3.3"        # For directory traversal
+fs_extra = "1.3.0"       # For extended file system operations
+rayon = "1.7.0"          # For parallel processing
+clap = { version = "4.3.0", features = ["derive"] }  # For command line argument parsing
+log = "0.4.17"           # For logging
+env_logger = "0.10.0"    # For logging configuration
+chrono = "0.4.24"        # For timestamp handling
+sha2 = "0.10.6"          # For file hashing
+indicatif = "0.17.3"     # For progress bars
+num_cpus = "1.15.0"      # For getting the number of CPU cores
+pathdiff = "0.2.1"       # For relative path calculation
+filetime = "0.2.20"      # For setting file timestamps
