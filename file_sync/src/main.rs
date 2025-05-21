@@ -29,11 +29,11 @@ enum Commands {
         destination: PathBuf,
 
         /// Delete files in destination that don't exist in source
-        #[arg(short, long, default_value_t = false)]
+        #[arg(short = 'D', long, default_value_t = false)]
         delete: bool,
 
         /// Only simulate, don't actually copy/delete files
-        #[arg(short, long, default_value_t = false)]
+        #[arg(short = 'n', long, default_value_t = false)]
         dry_run: bool,
 
         /// Number of parallel jobs (default: number of CPU cores)
