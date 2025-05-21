@@ -17,4 +17,7 @@ pub struct SyncConfig {
     
     /// Number of parallel jobs
     pub jobs: usize,
+    
+    /// Patterns of files to ignore
+    pub ignore_patterns: Vec<String>,
 }

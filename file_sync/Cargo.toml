@@ -2,8 +2,6 @@
 name = "file_sync"
 version = "0.1.0"
 edition = "2021"
-authors = ["Your Name <your.email@example.com>"]
-description = "A file synchronization tool written in Rust"
 
 [dependencies]
 walkdir = "2.3.3"        # For directory traversal
@@ -18,3 +16,4 @@ indicatif = "0.17.3"     # For progress bars
 num_cpus = "1.15.0"      # For getting the number of CPU cores
 pathdiff = "0.2.1"       # For relative path calculation
 filetime = "0.2.20"      # For setting file timestamps
+globset = "0.4.10"       # For glob pattern matching

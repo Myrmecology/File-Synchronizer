@@ -39,6 +39,10 @@ enum Commands {
         /// Number of parallel jobs (default: number of CPU cores)
         #[arg(short, long)]
         jobs: Option<usize>,
+        
+        /// Patterns of files to ignore (can be specified multiple times)
+        #[arg(short, long)]
+        ignore: Vec<String>,
     },
 }
 
@@ -58,6 +62,7 @@ fn main() {
             delete,
             dry_run,
             jobs,
+            ignore,
         } => {
             info!("Starting synchronization");
             
@@ -80,6 +85,7 @@ fn main() {
                 delete: *delete,
                 dry_run: *dry_run,
                 jobs: jobs.unwrap_or_else(|| num_cpus::get()),
+                ignore_patterns: ignore.clone(),
             };
 
             match synchronize(&config) {
