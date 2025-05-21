@@ -1,12 +1,15 @@
 use crate::config::SyncConfig;
 use crate::file_utils::{copy_file, delete_path, files_are_equal, get_relative_path};
 use globset::{Glob, GlobSet, GlobSetBuilder};
-use indicatif::{ProgressBar, ProgressStyle};
+use indicatif::{ProgressBar, ProgressStyle, HumanBytes, HumanDuration};
 use log::{debug, info};
 use rayon::prelude::*;
 use std::collections::HashSet;
 use std::io;
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::Arc;
+use std::time::Instant;
 use walkdir::WalkDir;
 
 /// Synchronize files from source to destination
@@ -58,18 +61,29 @@ pub fn synchronize(config: &SyncConfig) -> io::Result<()> {
 
     if source_files.is_empty() {
         info!("No files to synchronize after applying ignore patterns");
+        return Ok(());
     } else {
         info!("Found {} files to synchronize", source_files.len());
     }
 
-    // Create progress bar
-    let progress_bar = ProgressBar::new(source_files.len() as u64);
+    // Calculate total size of all files
+    let total_bytes = source_files.iter().fold(0, |acc, path| {
+        acc + std::fs::metadata(path).map(|m| m.len()).unwrap_or(0)
+    });
+
+    let processed_bytes = Arc::new(AtomicU64::new(0));
+
+    // Create progress bar with enhanced style
+    let progress_bar = ProgressBar::new(total_bytes);
     progress_bar.set_style(
         ProgressStyle::default_bar()
-            .template("[{elapsed_precise}] {bar:40.cyan/blue} {pos}/{len} {msg}")
+            .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta}) {msg}")
             .expect("Invalid progress bar template")
             .progress_chars("##-"),
     );
+
+    // Start time for calculating transfer speed
+    let start_time = Instant::now();
 
     // Process files in parallel
     source_files
@@ -85,17 +99,38 @@ pub fn synchronize(config: &SyncConfig) -> io::Result<()> {
                 true
             };
 
+            let file_size = std::fs::metadata(source_path).map(|m| m.len()).unwrap_or(0);
+
             if should_copy {
                 copy_file(source_path, &dest_path, config.dry_run)?;
             } else {
                 debug!("Skipping unchanged file: {:?}", rel_path);
             }
 
-            progress_bar.inc(1);
+            // Update progress
+            processed_bytes.fetch_add(file_size, Ordering::Relaxed);
+            progress_bar.set_position(processed_bytes.load(Ordering::Relaxed));
+            progress_bar.set_message(format!("File: {}", rel_path.display()));
+
             Ok(())
         })?;
 
-    progress_bar.finish_with_message("File synchronization completed");
+    // Calculate overall transfer speed
+    let elapsed = start_time.elapsed();
+    let bytes_processed = processed_bytes.load(Ordering::Relaxed);
+    let speed = if elapsed.as_secs() > 0 {
+        bytes_processed / elapsed.as_secs()
+    } else {
+        bytes_processed
+    };
+
+    progress_bar.finish_with_message(format!(
+        "Synchronized {} files ({}) in {}. Avg speed: {}/s",
+        source_files.len(),
+        HumanBytes(bytes_processed),
+        HumanDuration(elapsed),
+        HumanBytes(speed)
+    ));
 
     // Delete files in destination that don't exist in source
     if config.delete {
@@ -117,21 +152,52 @@ pub fn synchronize(config: &SyncConfig) -> io::Result<()> {
         if files_to_delete.is_empty() {
             info!("No files to delete");
         } else {
-            let delete_progress = ProgressBar::new(files_to_delete.len() as u64);
+            // Calculate total size of files to delete
+            let total_delete_bytes = files_to_delete.iter().fold(0, |acc, path| {
+                acc + std::fs::metadata(path).map(|m| m.len()).unwrap_or(0)
+            });
+
+            let delete_bytes = Arc::new(AtomicU64::new(0));
+
+            let delete_progress = ProgressBar::new(total_delete_bytes);
             delete_progress.set_style(
                 ProgressStyle::default_bar()
-                    .template("[{elapsed_precise}] {bar:40.red/blue} {pos}/{len} {msg}")
+                    .template("{spinner:.red} [{elapsed_precise}] [{bar:40.red/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta}) {msg}")
                     .expect("Invalid progress bar template")
                     .progress_chars("##-"),
             );
 
+            let delete_start_time = Instant::now();
+
             files_to_delete.par_iter().try_for_each(|path| {
+                let file_size = std::fs::metadata(path).map(|m| m.len()).unwrap_or(0);
+                let rel_path = get_relative_path(path, &config.destination);
+                
                 let result = delete_path(path, config.dry_run);
-                delete_progress.inc(1);
+                
+                // Update progress
+                delete_bytes.fetch_add(file_size, Ordering::Relaxed);
+                delete_progress.set_position(delete_bytes.load(Ordering::Relaxed));
+                delete_progress.set_message(format!("Deleting: {}", rel_path.display()));
+                
                 result
             })?;
 
-            delete_progress.finish_with_message("Deletion completed");
+            let delete_elapsed = delete_start_time.elapsed();
+            let delete_bytes_processed = delete_bytes.load(Ordering::Relaxed);
+            let delete_speed = if delete_elapsed.as_secs() > 0 {
+                delete_bytes_processed / delete_elapsed.as_secs()
+            } else {
+                delete_bytes_processed
+            };
+
+            delete_progress.finish_with_message(format!(
+                "Deleted {} files ({}) in {}. Avg speed: {}/s",
+                files_to_delete.len(),
+                HumanBytes(delete_bytes_processed),
+                HumanDuration(delete_elapsed),
+                HumanBytes(delete_speed)
+            ));
         }
     }
 
@@ -155,7 +221,6 @@ fn scan_directory(dir: &Path, glob_set: &GlobSet) -> io::Result<Vec<PathBuf>> {
         let rel_path = get_relative_path(&path, dir);
         let rel_path_str = rel_path.to_string_lossy();
         
-        // Fix: Convert to a String first, then use that as it implements AsRef<Path>
         if glob_set.is_match(rel_path_str.to_string()) {
             debug!("Ignoring file: {:?}", rel_path);
             continue;
