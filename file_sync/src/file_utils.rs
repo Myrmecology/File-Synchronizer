@@ -1,9 +1,8 @@
-use log::{debug, info, warn};
+use log::{debug, info};
 use sha2::{Digest, Sha256};
 use std::fs::{self, File};
 use std::io::{self, Read};
 use std::path::{Path, PathBuf};
-use std::time::SystemTime;
 
 /// Get the relative path from base to path
 pub fn get_relative_path(path: &Path, base: &Path) -> PathBuf {
@@ -71,7 +70,10 @@ pub fn copy_file(source: &Path, destination: &Path, dry_run: bool) -> io::Result
     }
 
     info!("Copying: {:?} -> {:?}", source, destination);
-    fs_extra::file::copy(source, destination, &fs_extra::file::CopyOptions::new())
+    // Create copy options with overwrite enabled
+    let mut options = fs_extra::file::CopyOptions::new();
+    options.overwrite = true;
+    fs_extra::file::copy(source, destination, &options)
         .map_err(|e| io::Error::new(io::ErrorKind::Other, e.to_string()))?;
     
     // Copy modification time
