@@ -1,0 +1,50 @@
+cat > .gitignore << 'EOF'
+# Rust build artifacts
+/target/
+Cargo.lock
+*.exe
+*.pdb
+*.d
+.rustc_info.json
+CACHEDIR.TAG
+
+# Rust directories that shouldn't be committed
+.fingerprint/
+incremental/
+deps/
+build/
+
+# YubiKey files
+pubkey.asc
+yubikey-public.asc
+*.asc
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Test files
+test_destination/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+*.bak
+
+# Environment files
+.env
+.env.local
+EOF
