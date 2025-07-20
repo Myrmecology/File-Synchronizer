@@ -3,6 +3,8 @@
 A fast and efficient file synchronization tool written in Rust. This utility helps you keep directories in sync by copying files from a source to a destination with various options like dry-run, ignore patterns, and parallel processing.
 🚀 Features
 
+For a video demo: https://www.youtube.com/watch?v=RUxZoChOa8c    🦀
+
 ⚡ Fast Synchronization - Quickly copy files from source to destination
 🧵 Parallel Processing - Utilize multiple CPU cores for faster transfers
 🧠 Smart Detection - Only copy files that are different or new
