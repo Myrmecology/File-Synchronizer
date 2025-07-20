@@ -1,50 +1,417 @@
-cat > .gitignore << 'EOF'
-# Rust build artifacts
+# ====================================================
+# MAXIMUM SECURITY .gitignore for Rust Projects
+# ====================================================
+# This .gitignore provides comprehensive protection against
+# accidentally committing sensitive data, credentials, and
+# build artifacts to version control.
+
+# ===================
+# RUST BUILD ARTIFACTS
+# ===================
 /target/
-Cargo.lock
+**/target/
+target
 *.exe
 *.pdb
 *.d
 .rustc_info.json
 CACHEDIR.TAG
 
-# Rust directories that shouldn't be committed
-.fingerprint/
-incremental/
-deps/
-build/
+# Rust compilation cache & incremental builds
+**/.fingerprint/
+**/incremental/
+**/deps/
+**/build/
+**/debug/
+**/release/
 
-# YubiKey files
-pubkey.asc
-yubikey-public.asc
+# Cargo files
+Cargo.lock
+.cargo/
+.cargo
+
+# ===================
+# SECURITY CRITICAL - CREDENTIALS & KEYS
+# ===================
+
+# Environment & Configuration Files
+.env
+.env.*
+.environment
+*.env
+config.json
+secrets.json
+credentials.json
+settings.json
+app.config
+web.config
+
+# SSH Keys & Certificates
+*.pem
+*.key
+*.crt
+*.cert
+*.cer
+*.csr
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+known_hosts
+authorized_keys
+
+# GPG/PGP Keys & YubiKey Files
+*.gpg
 *.asc
+*.sig
+secring.*
+pubring.*
+yubikey-*.asc
+pubkey.asc
+private.asc
+secret.asc
+*.pgp
 
-# IDE and editor files
-.vscode/
-.idea/
+# API Keys & Tokens
+api_keys.txt
+api_keys.json
+*.token
+*.key.json
+service-account*.json
+gcp-*.json
+aws-credentials
+.aws/
+azure.json
+
+# Database Credentials
+database.yml
+database.json
+db.config
+connection.json
+*.sql
+
+# OAuth & Authentication
+client_secret*.json
+oauth*.json
+auth_config*.json
+*.oauth
+
+# Cloud Provider Files
+.gcloud/
+.azure/
+.aws/
+terraform.tfstate*
+*.tfvars
+.terraform/
+
+# ===================
+# TEST DATA & TEMPORARY FILES
+# ===================
+
+# Test Directories
+test_source/
+test_destination/
+test_output/
+temp_test/
+test_data/
+fixtures/
+sample_data/
+
+# Test Files
+test*.txt
+test*.dat
+test*.log
+test*.bak
+test*.json
+test*.xml
+test*.csv
+sample*.*
+dummy*.*
+mock*.*
+
+# Temporary Files
+*.tmp
+*.temp
 *.swp
 *.swo
+*.cache
+*.pid
+*.lock
 *~
+*.backup
+*.orig
 
-# OS generated files
+# ===================
+# LOGS & DEBUG FILES
+# ===================
+*.log
+*.out
+*.err
+logs/
+log/
+debug.log
+error.log
+access.log
+application.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===================
+# IDE & EDITOR FILES
+# ===================
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+.history/
+
+# IntelliJ IDEA / CLion / RustRover
+.idea/
+*.iml
+*.ipr
+*.iws
+*.idea
+
+# Vim/Neovim
+*.swp
+*.swo
+*.swn
+*~
+.*.un~
+Session.vim
+.netrwhist
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+*.sublime-session
+
+# Atom
+.atom/
+
+# Nano
+*.save
+
+# ===================
+# OPERATING SYSTEM FILES
+# ===================
+
+# macOS
 .DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
-ehthumbs.db
+.AppleDouble
+.LSOverride
+Icon?
+.DocumentRevisions-V100
+.fseventsd
+.TemporaryItems
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
 Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+*.url
 
-# Test files
-test_destination/
+# Linux
+*~
+.directory
+.Trash-*
+.nfs*
 
-# Logs and temporary files
-*.log
-*.tmp
-*.temp
-*.bak
+# ===================
+# PACKAGE MANAGERS & DEPENDENCIES
+# ===================
 
-# Environment files
-.env
-.env.local
-EOF
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+.npm
+.yarn/
+.pnp.*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Ruby
+*.gem
+*.rbc
+/.config
+/coverage/
+/InstalledFiles
+/pkg/
+/spec/reports/
+/spec/examples.txt
+/test/tmp/
+/test/version_tmp/
+/tmp/
+.bundle/
+vendor/bundle
+
+# ===================
+# DATABASES & DATA FILES
+# ===================
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+*.mdb
+*.accdb
+*.sql
+*.dump
+*.backup
+data/
+database/
+*.csv
+*.xlsx
+*.xls
+
+# ===================
+# MEDIA & BINARY FILES
+# ===================
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.svg
+*.ico
+*.bmp
+*.tiff
+*.webp
+*.mp3
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.pdf
+*.doc
+*.docx
+*.ppt
+*.pptx
+
+# ===================
+# ARCHIVE & COMPRESSED FILES
+# ===================
+*.zip
+*.tar
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.rar
+*.7z
+*.gz
+*.bz2
+*.xz
+*.Z
+
+# ===================
+# DEVELOPMENT & BUILD TOOLS
+# ===================
+
+# Coverage Reports
+coverage/
+*.profraw
+*.profdata
+lcov.info
+tarpaulin-report.html
+*.gcno
+*.gcda
+
+# Benchmarking & Profiling
+*.prof
+perf.data*
+flamegraph.svg
+callgrind.out.*
+criterion/
+benches/target/
+
+# Documentation Build
+target/doc/
+book/
+docs/_build/
+site/
+
+# WebAssembly
+*.wasm
+pkg/
+
+# ===================
+# DOCKER & CONTAINERS
+# ===================
+Dockerfile.local
+docker-compose.override.yml
+.dockerignore
+
+# ===================
+# VERSION CONTROL
+# ===================
+.git/
+.gitattributes.local
+.gitconfig.local
+*.patch
+*.diff
+
+# ===================
+# LOCAL DEVELOPMENT
+# ===================
+.local/
+scratch/
+playground/
+experiments/
+local/
+private/
+personal/
+dev/
+development/
+
+# ===================
+# CUSTOM PROJECT SPECIFIC
+# ===================
+# Add your project-specific sensitive files here
+# Example: internal_config.toml
+# Example: production_keys.json
+# Example: customer_data/
